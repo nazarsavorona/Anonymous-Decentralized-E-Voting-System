@@ -1,22 +1,29 @@
-package ua.knu.backend.sigalgorithms;
+package ua.knu.backend.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.math.ec.ECPoint;
+import org.springframework.stereotype.Component;
 import ua.knu.backend.hashalgorithms.HashAlgorithm;
-import ua.knu.backend.hashalgorithms.SHA1;
+import ua.knu.backend.hashalgorithms.SHA256;
+import ua.knu.backend.sigalgorithms.EllipticCurve;
+import ua.knu.backend.sigalgorithms.KeyPair;
+import ua.knu.backend.sigalgorithms.Signature;
+import ua.knu.backend.utils.SignatureUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+@Component
+@Slf4j
 public class RingSignatureService {
     private final HashAlgorithm hashAlgorithm;
 
     private final EllipticCurve curve;
 
-    public RingSignatureService(HashAlgorithm hashAlgorithm, String ellipticCurveName) {
+    public RingSignatureService(SHA256 hashAlgorithm) {
         this.hashAlgorithm = hashAlgorithm;
-        this.curve = new EllipticCurve(ellipticCurveName);
+        this.curve = new EllipticCurve();
     }
 
     public KeyPair generateKeys() {
@@ -31,8 +38,8 @@ public class RingSignatureService {
             throw new AssertionError();
         }
 
-        List<BigInteger> rList = Utils.generateRandomBigIntegerList(publicKeysCount, curve.getOrder());
-        List<BigInteger> cList = Utils.generateRandomBigIntegerList(publicKeysCount, curve.getOrder());
+        List<BigInteger> rList = SignatureUtils.generateRandomBigIntegerList(publicKeysCount, curve.getOrder());
+        List<BigInteger> cList = SignatureUtils.generateRandomBigIntegerList(publicKeysCount, curve.getOrder());
 
         List<ECPoint> lArray = new ArrayList<>();
         List<ECPoint> rArray = new ArrayList<>();
@@ -58,7 +65,7 @@ public class RingSignatureService {
             rArray.add(rHcI);
         }
 
-        BigInteger c = Utils.getHash(hashAlgorithm, message, lArray, rArray);
+        BigInteger c = SignatureUtils.getHash(hashAlgorithm, message, lArray, rArray);
         BigInteger res = BigInteger.valueOf(0);
 
         for (int i = 0; i < publicKeysCount; i++) {
@@ -103,25 +110,31 @@ public class RingSignatureService {
         }
 
         c = c.mod(curve.getOrder());
-        BigInteger hash = Utils.getHash(hashAlgorithm, message, newLList, newRList).mod(curve.getOrder());
+        BigInteger hash = SignatureUtils.getHash(hashAlgorithm, message, newLList, newRList).mod(curve.getOrder());
 
         return c.equals(hash);
     }
 
     public static void main(String[] args) {
-        RingSignatureService ringSignatureService = new RingSignatureService(new SHA1(), "curve25519");
-        KeyPair keys1 = ringSignatureService.generateKeys();
-        KeyPair keys2 = ringSignatureService.generateKeys();
-        KeyPair keys3 = ringSignatureService.generateKeys();
+        RingSignatureService ringSignatureService = new RingSignatureService(new SHA256());
+
+        int numberOfKeys = 8;
+
+        List<KeyPair> keys = new ArrayList<>();
+        for (int i = 0; i < numberOfKeys; i++) {
+            keys.add(ringSignatureService.generateKeys());
+        }
 
         String message = "Yes, it's working...";
 
-        List<ECPoint> publicKeys = new ArrayList<>(Arrays.asList(keys1.getPublicKey(), keys2.getPublicKey()
-                , keys3.getPublicKey()));
+        List<ECPoint> publicKeys = new ArrayList<>();
+        for (int i = 0; i < numberOfKeys; i++) {
+            publicKeys.add(keys.get(i).getPublicKey());
+        }
 
         Signature signature = ringSignatureService.signMessage(message,
-                keys2, publicKeys, 1);
+                keys.get(5), publicKeys, 5);
 
-        System.out.print(ringSignatureService.verifySignature(message, signature, publicKeys));
+        log.info(String.valueOf(ringSignatureService.verifySignature(message, signature, publicKeys)));
     }
 }

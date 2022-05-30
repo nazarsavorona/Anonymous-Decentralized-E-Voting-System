@@ -1,4 +1,4 @@
-package ua.knu.backend.sigalgorithms;
+package ua.knu.backend.utils;
 
 import org.bouncycastle.math.ec.ECPoint;
 import ua.knu.backend.hashalgorithms.HashAlgorithm;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Utils {
+public class SignatureUtils {
     private static final Random rand = new Random();
 
     public static BigInteger nextRandomBigInteger(BigInteger n) {
