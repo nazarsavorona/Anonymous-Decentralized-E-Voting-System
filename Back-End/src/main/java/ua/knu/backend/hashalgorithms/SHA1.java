@@ -1,11 +1,14 @@
 package ua.knu.backend.hashalgorithms;
 
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.pow;
 
+@Component(value = "SHA1")
 public class SHA1 implements HashAlgorithm{
     private final int BLOCK_SIZE = 512;
     private final int WORD_SIZE = 32;
