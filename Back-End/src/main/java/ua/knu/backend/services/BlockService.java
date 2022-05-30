@@ -2,6 +2,8 @@ package ua.knu.backend.services;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ua.knu.backend.hashalgorithms.HashAlgorithm;
+import ua.knu.backend.hashalgorithms.Keccak;
 import ua.knu.backend.merkletree.MerkleTree;
 import ua.knu.backend.merkletree.Node;
 import ua.knu.backend.entities.Block;

@@ -40,6 +40,14 @@ public class Block {
 
     @Column(name = "nonce", nullable = false)
     private int nonce;
+
+    public void incrementNonce() {
+        this.nonce++;
+    }
+
+    public String getFieldsString() {
+        return majorVersion + String.valueOf(minorVersion) + timeStamp + previousBlockHash + merkleRootHash + nonce;
+    }
 }
 
 
