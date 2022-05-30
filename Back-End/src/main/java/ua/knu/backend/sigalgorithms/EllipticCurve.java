@@ -5,7 +5,8 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
-import ua.knu.backend.sigalgorithms.Utils;
+import ua.knu.backend.dto.ECPointDTO;
+import ua.knu.backend.utils.SignatureUtils;
 
 import java.math.BigInteger;
 
@@ -13,11 +14,9 @@ public class EllipticCurve {
     private final ECNamedCurveParameterSpec spec;
     private final ECCurve curve;
 
-    public EllipticCurve(String curveName) {
-        //"curve25519"
-        spec = ECNamedCurveTable.getParameterSpec(curveName);
+    public EllipticCurve() {
+        spec = ECNamedCurveTable.getParameterSpec("curve25519");
         curve = spec.getCurve();
-
     }
 
     public ECPoint deterministicHashOnCurve(ECPoint publicKey) {
@@ -34,12 +33,13 @@ public class EllipticCurve {
     }
 
     public Pair<BigInteger, ECPoint> generateKeyPair() {
-        BigInteger privateKey = Utils.nextRandomBigInteger(getOrder());
-//        byte[] keys = privateKey.toByteArray();
-//        maskPrivateKey(keys);
-//        privateKey = new BigInteger(keys);
+        BigInteger privateKey = SignatureUtils.nextRandomBigInteger(getOrder());
 
         return new Pair<>(privateKey, getPublicKey(privateKey));
+    }
+
+    public ECPoint createPoint(ECPointDTO point) {
+        return curve.createPoint(point.getX(), point.getY());
     }
 
     public static void maskPrivateKey(byte[] key) {
