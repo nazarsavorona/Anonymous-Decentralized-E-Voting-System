@@ -1,6 +1,7 @@
 package ua.knu.backend.validator;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import ua.knu.backend.entities.Block;
 import ua.knu.backend.entities.Transaction;
 import ua.knu.backend.hashalgorithms.HashAlgorithm;
@@ -13,8 +14,11 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
+@Component
 public class Validator {
+    private static final long MAX_TRANSACTION_COUNT = 50;
     private static final long MINUTE = 60_000;
+    private static final long SECONDS = 10_000;
     private final TransactionService transactionService;
     private final BlockService blockService;
     private final HashAlgorithm hashAlgorithm;
@@ -24,7 +28,6 @@ public class Validator {
     private long firstTransactionTime;
     private Transaction currentTransaction;
     private final Object currentTransactionLock = new Object();
-
 
     public Validator(TransactionService transactionService,
                      TransactionProvider provider,
@@ -37,12 +40,14 @@ public class Validator {
         this.memPool = new ArrayList<>();
         this.currentBLockTransactions = new ArrayList<>();
         this.currentBlock = new Block();
+        this.currentBlock.setPreviousBlockHash("-1");
         this.firstTransactionTime = -1;
 
-        new TransactionPuller(this, provider).run();
-        new MemPoolManager(this).run();
-        new BlockLoader(this).run();
-        new Miner(this).run();
+        new Thread(new TransactionPuller(this, provider), "Transaction puller").start();
+        new Thread(new MemPoolManager(this), "MemPool manager").start();
+        new Thread(new BlockLoader(this), "Block loader").start();
+        new Thread(new Miner(this), "Miner").start();
+        log.info("Validator up");
     }
 
     public boolean setCurrentTransaction(Transaction transaction) {
@@ -62,7 +67,9 @@ public class Validator {
             this.currentBlock.setMinorVersion(0);
             this.currentBlock.setTimeStamp(new Date().getTime() / 1000);
             this.blockService.setMerkleRoot(this.currentBlock, this.currentBLockTransactions);
-            mineBlock(5);
+            mineBlock(1);
+
+            log.info(this.currentBlock.getBlockHash());
 
             Block createdBlock = this.blockService.save(currentBlock);
             for (Transaction transaction : this.currentBLockTransactions) {
@@ -100,7 +107,7 @@ public class Validator {
                 return;
             }
 
-            if (memPool.size() >= 50 || new Date().getTime() - this.firstTransactionTime >= MINUTE) {
+            if (memPool.size() >= MAX_TRANSACTION_COUNT || new Date().getTime() - this.firstTransactionTime >= SECONDS) {
                 if (!currentBLockTransactions.isEmpty()) {
                     return;
                 }
@@ -125,6 +132,7 @@ public class Validator {
 
     private void mineBlock(int prefix) {
         String prefixString = new String(new char[prefix]).replace('\0', '0');
+        setBlockHash();
         while (!this.currentBlock.getBlockHash().substring(0, prefix).equals(prefixString)) {
             this.currentBlock.incrementNonce();
             setBlockHash();

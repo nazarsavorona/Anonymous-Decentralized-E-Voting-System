@@ -1,7 +1,9 @@
 package ua.knu.backend.validator;
 
+import org.springframework.stereotype.Component;
 import ua.knu.backend.entities.Transaction;
 
+@Component
 public class TransactionPuller implements Runnable {
     private Validator validator;
     private TransactionProvider provider;

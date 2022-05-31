@@ -1,18 +1,20 @@
 package ua.knu.backend.validator;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import ua.knu.backend.entities.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@Component
 public class TransactionProvider {
     private List<Transaction> transactions;
 
     private final Object lock = new Object();
 
-    public TransactionProvider(Validator validator) {
+    public TransactionProvider() {
         transactions = new ArrayList<>();
     }
 
