@@ -1,7 +1,7 @@
 package ua.knu.backend.merkletree;
 
 import ua.knu.backend.hashalgorithms.HashAlgorithm;
-import ua.knu.backend.hashalgorithms.SHA1;
+import ua.knu.backend.hashalgorithms.SHA256;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Queue;
 
 public class MerkleTree {
-    private static final HashAlgorithm hashAlgorithm = new SHA1();
+    private static final HashAlgorithm hashAlgorithm = new SHA256();
 
     public static Node generateTree(List<String> dataBlocks) {
         ArrayList<Node> childNodes = new ArrayList<>();

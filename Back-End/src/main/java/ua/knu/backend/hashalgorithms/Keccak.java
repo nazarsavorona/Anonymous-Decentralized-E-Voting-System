@@ -1,6 +1,7 @@
 package ua.knu.backend.hashalgorithms;
 
 import lombok.AllArgsConstructor;
+import org.bouncycastle.math.ec.ECPoint;
 import org.springframework.stereotype.Component;
 
 import static ua.knu.backend.hashalgorithms.HexUtils.leftRotate64;
@@ -30,6 +31,11 @@ public class Keccak implements HashAlgorithm{
     @Override
     public String Hash(String message){
         return Hex.encodeHexString(getHash(message.getBytes()));
+    }
+
+    public String Hash(ECPoint point){
+        byte[] toHash = point.getEncoded(true);
+        return Hex.encodeHexString(toHash);
     }
 
     public byte[] getHash(final byte[] message) {

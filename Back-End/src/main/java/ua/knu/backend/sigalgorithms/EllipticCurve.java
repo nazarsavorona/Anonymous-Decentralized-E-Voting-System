@@ -24,8 +24,8 @@ public class EllipticCurve {
         return spec.getG().multiply(pKInteger).normalize();
     }
 
-    public ECPoint getKeyImage(BigInteger factor, ECPoint publicKey) {
-        return deterministicHashOnCurve(publicKey).multiply(factor).normalize();
+    public ECPoint getKeyImage(BigInteger privateKey, ECPoint publicKey) {
+        return deterministicHashOnCurve(publicKey).multiply(privateKey).normalize();
     }
 
     public ECPoint getPublicKey(BigInteger factor) {
@@ -35,6 +35,10 @@ public class EllipticCurve {
     public Pair<BigInteger, ECPoint> generateKeyPair() {
         BigInteger privateKey = SignatureUtils.nextRandomBigInteger(getOrder());
 
+        return new Pair<>(privateKey, getPublicKey(privateKey));
+    }
+
+    public Pair<BigInteger, ECPoint> generateKeyPair(BigInteger privateKey) {
         return new Pair<>(privateKey, getPublicKey(privateKey));
     }
 
