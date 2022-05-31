@@ -2,7 +2,8 @@ package ua.knu.backend.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.math.ec.ECPoint;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import ua.knu.backend.dto.ECPointDTO;
 import ua.knu.backend.hashalgorithms.HashAlgorithm;
 import ua.knu.backend.hashalgorithms.SHA256;
 import ua.knu.backend.sigalgorithms.EllipticCurve;
@@ -14,20 +15,25 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 @Slf4j
 public class RingSignatureService {
     private final HashAlgorithm hashAlgorithm;
 
     private final EllipticCurve curve;
 
-    public RingSignatureService(SHA256 hashAlgorithm) {
+    public RingSignatureService(HashAlgorithm hashAlgorithm) {
         this.hashAlgorithm = hashAlgorithm;
         this.curve = new EllipticCurve();
+        log.info("Ring signature service up");
     }
 
     public KeyPair generateKeys() {
         return new KeyPair(curve);
+    }
+
+    public KeyPair generateKeys(BigInteger privateKey) {
+        return new KeyPair(curve, privateKey);
     }
 
     public Signature signMessage(String message, KeyPair personalKeys,
@@ -131,6 +137,7 @@ public class RingSignatureService {
         for (int i = 0; i < numberOfKeys; i++) {
             publicKeys.add(keys.get(i).getPublicKey());
         }
+
 
         Signature signature = ringSignatureService.signMessage(message,
                 keys.get(5), publicKeys, 5);

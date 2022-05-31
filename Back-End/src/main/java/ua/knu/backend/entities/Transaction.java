@@ -23,7 +23,7 @@ public class Transaction implements Serializable {
     @Id
     @Column(name = "tx_id", nullable = false, unique = true)
     @JsonProperty
-    private String transactionID;
+    private String transactionID = "";
 
     @Column(name = "nonce", nullable = false)
     private int nonce;
@@ -61,6 +61,13 @@ public class Transaction implements Serializable {
                 signature;
     }
 
+    public String getSigningString(){
+        return nonce +
+                String.valueOf(candidateID) +
+                timeStamp +
+                publicKeys.toString();
+    }
+
     public void printTransaction() {
         log.info(this.toString());
     }
@@ -68,13 +75,13 @@ public class Transaction implements Serializable {
     @Override
     public String toString() {
         return String.format("TransactionID: %s, Nonce: %d, CandidateID: %d, Timestamp: %d, Public Keys: %s, " +
-                        "Signature: %s, Block hash: %s ",
+                        "Signature: %s, Block: %s ",
                 this.transactionID,
                 this.nonce,
                 this.candidateID,
                 this.timeStamp,
                 this.publicKeys,
                 this.signature,
-                this.block.getBlockHash());
+                this.block);
     }
 }

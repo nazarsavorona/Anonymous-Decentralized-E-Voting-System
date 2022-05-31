@@ -9,6 +9,7 @@ import java.math.BigInteger;
 
 @Getter
 @Setter
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -16,12 +17,12 @@ public class ECPointDTO implements Serializable {
     private BigInteger x;
     private BigInteger y;
 
-    public ECPointDTO(ECPoint point){
-        this.x = point.getXCoord().toBigInteger();
-        this.y = point.getYCoord().toBigInteger();
+    public ECPointDTO getECPointDTO(ECPoint point) {
+        return new ECPointDTO(point.getXCoord().toBigInteger(),
+                point.getYCoord().toBigInteger());
     }
 
-    public ECPoint getECPoint(){
+    public ECPoint convertToECPoint() {
         EllipticCurve curve = new EllipticCurve();
         return curve.createPoint(this);
     }

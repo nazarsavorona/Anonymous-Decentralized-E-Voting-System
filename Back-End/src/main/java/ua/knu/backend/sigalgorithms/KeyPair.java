@@ -20,4 +20,13 @@ public class KeyPair {
         this.publicKey = keys.getValue();
         this.keyImage = generatedKeyImage;
     }
+
+    public KeyPair(EllipticCurve curve, BigInteger privateKey) {
+        Pair<BigInteger, ECPoint> keys = curve.generateKeyPair(privateKey);
+        ECPoint generatedKeyImage = curve.getKeyImage(keys.getKey(), keys.getValue()).normalize();
+
+        this.privateKey = keys.getKey();
+        this.publicKey = keys.getValue();
+        this.keyImage = generatedKeyImage;
+    }
 }
