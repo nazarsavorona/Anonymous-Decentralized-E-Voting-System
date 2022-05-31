@@ -7,11 +7,18 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.knu.backend.entities.Block;
 import ua.knu.backend.services.BlockService;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
 @Slf4j
 public class BlockController {
     private final BlockService blockService;
+
+    @GetMapping(value = "/blocks")
+    public List<Block> findAll(){
+        return this.blockService.indexBlocks();
+    }
 
     @GetMapping(value = "/block")
     public void testSaveBlock() {

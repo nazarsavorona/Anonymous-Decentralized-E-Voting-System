@@ -16,40 +16,21 @@ public class SignatureConverterJson implements AttributeConverter<SignatureDTO, 
     @Override
     public String convertToDatabaseColumn(SignatureDTO meta) {
         try {
-            String objectStr = objectToJson(meta);
+            String objectStr = objectMapper.writeValueAsString(meta);
             return objectStr;
         } catch (Exception ex) {
+            log.error(ex.getMessage());
             return null;
-            // or throw an error
         }
     }
 
     @Override
     public SignatureDTO convertToEntityAttribute(String dbData) {
         try {
-            SignatureDTO signature = jsonToObject(dbData);
-            return signature;
+            return  objectMapper.readValue(dbData, SignatureDTO.class);
         } catch (Exception ex) {
-//            logger.error("Unexpected IOEx decoding json from database: " + dbData);
+            log.error(ex.getMessage());
             return null;
         }
-    }
-
-    private static String objectToJson(SignatureDTO data) {
-        try {
-            return objectMapper.writeValueAsString(data);
-        } catch (Exception ex) {
-            System.out.println(ex);
-        }
-        return "";
-    }
-
-    private static SignatureDTO jsonToObject(String data) {
-        try {
-            return objectMapper.readValue(data, SignatureDTO.class);
-        } catch (Exception ex) {
-            System.out.println(ex);
-        }
-        return new SignatureDTO();
     }
 }

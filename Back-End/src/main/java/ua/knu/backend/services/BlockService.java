@@ -26,6 +26,10 @@ public class BlockService {
         return  repository.findByBlockHash(blockHash);
     }
 
+    public List<Block> indexBlocks(){
+        return repository.findAll();
+    }
+
     public void setMerkleRoot(Block block, List<Transaction> transactions) {
         List<String> transactionIDs = new ArrayList<>();
 

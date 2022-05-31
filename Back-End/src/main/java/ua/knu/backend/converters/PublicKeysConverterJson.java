@@ -1,7 +1,6 @@
 package ua.knu.backend.converters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,11 +22,10 @@ public class PublicKeysConverterJson implements AttributeConverter<List<ECPointD
     public String convertToDatabaseColumn(List<ECPointDTO> meta) {
         try {
             String objectStr = objectsToJson(meta);
-            log.info(objectStr);
             return objectStr;
         } catch (Exception ex) {
+            log.error(ex.getMessage());
             return null;
-            // or throw an error
         }
     }
 
@@ -35,35 +33,24 @@ public class PublicKeysConverterJson implements AttributeConverter<List<ECPointD
     public List<ECPointDTO> convertToEntityAttribute(String dbData) {
         try {
             List<ECPointDTO> list = jsonToObjects(dbData);
-            log.info(list.toString());
             return list;
         } catch (Exception ex) {
-            return null;
+            log.error(ex.getMessage());
         }
-    }
-
-    private static JSONObject objectToJson(ECPointDTO data) {
-        try {
-            ECPointDTO point = new ECPointDTO(data.getX(), data.getY());
-            return new JSONObject(point);
-        } catch (Exception ex) {
-            System.out.println(ex);
-        }
-        return new JSONObject();
+        return null;
     }
 
     private static String objectsToJson(List<ECPointDTO> data) {
         try {
-            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
             JSONArray array = new JSONArray();
-            for (ECPointDTO datum : data) {
-                array.put(objectToJson(datum));
+            for (int i = 0; i < data.size(); i++) {
+                ECPointDTO temp = data.get(i);
+                Object obj = new JSONObject(temp);
+                array.put(obj);
             }
-
             return array.toString();
         } catch (Exception ex) {
-            System.out.println(ex);
+            log.error(ex.getMessage());
         }
         return "";
     }
@@ -74,7 +61,7 @@ public class PublicKeysConverterJson implements AttributeConverter<List<ECPointD
 
             return new ArrayList<>(Arrays.asList(publicKeys));
         } catch (Exception ex) {
-            System.out.println(ex);
+            log.error(ex.getMessage());
         }
         return new ArrayList<>();
     }
